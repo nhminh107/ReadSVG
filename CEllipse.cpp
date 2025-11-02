@@ -4,28 +4,46 @@
 using namespace std;
 
 void CEllipse::draw(sf::RenderWindow& window) const {
-    // 1️⃣ Áp dụng ma trận biến đổi
-    Point transformedCenter = center;
-    transformedCenter.applyTransform(this->getFinalMatrix());
+    Matrix m = this->getFinalMatrix();
 
-    // 2️⃣ Dùng bán trục thật
-    float radiusX = ellipseWidth / 2.f;
-    float radiusY = ellipseHeight / 2.f;
+    // Tâm đã transform
+    Point centerT = center;
+    centerT.applyTransform(m);
 
-    // 3️⃣ Tạo hình tròn bán kính 1, rồi scale theo tỉ lệ ellipse
-    sf::CircleShape ellipse(50.f); // 50 point detail để mịn
-    ellipse.setPointCount(100);    // tăng độ mượt
-    ellipse.setScale(radiusX / 50.f, radiusY / 50.f);
+    // Tính bán trục X thật: transform (cx + rx, cy)
+    float rx = ellipseWidth / 2.0f;
+    float ry = ellipseHeight / 2.0f;
 
-    // 4️⃣ Đặt vị trí
-    ellipse.setPosition(transformedCenter.xPoint - radiusX,
-        transformedCenter.yPoint - radiusY);
+    Point px(center.xPoint + rx, center.yPoint);
+    px.applyTransform(m);
+    float scaled_rx = px.distance(centerT);
 
-    // 5️⃣ Gán màu, viền
-    ellipse.setFillColor(fillColor.to_sfml_color());
-    ellipse.setOutlineColor(strokeColor.to_sfml_color());
-    ellipse.setOutlineThickness(strokeWidth);
+    Point py(center.xPoint, center.yPoint + ry);
+    py.applyTransform(m);
+    float scaled_ry = py.distance(centerT);
 
-    // 6️⃣ Vẽ
-    window.draw(ellipse);
+    // Dùng bán trục đã scale để dựng ellipse.
+    // Tạo CircleShape với radius base và scale theo tỉ lệ (an toàn)
+    float base = 100.f; // base radius for circle shape
+    sf::CircleShape circle(base);
+    circle.setPointCount(100);
+
+    // scale so that base * scaleX = scaled_rx
+    float scaleX = (base > 0.f) ? (scaled_rx / base) : 1.f;
+    float scaleY = (base > 0.f) ? (scaled_ry / base) : 1.f;
+    circle.setScale(scaleX, scaleY);
+
+    // vị trí: đặt top-left
+    circle.setPosition(centerT.xPoint - scaled_rx, centerT.yPoint - scaled_ry);
+
+    // stroke thickness scale
+    float sX = fabs(m.m[0][0]);
+    float sY = fabs(m.m[1][1]);
+    float avgS = (sX + sY) * 0.5f;
+    circle.setOutlineThickness(strokeWidth * avgS);
+
+    circle.setFillColor(fillColor.to_sfml_color());
+    circle.setOutlineColor(strokeColor.to_sfml_color());
+
+    window.draw(circle);
 }
