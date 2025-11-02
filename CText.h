@@ -9,7 +9,7 @@ private:
     std::string fontFamily;
     float fontSize;
     Point place;
-    mutable sf::Font font; // ✅ Giữ font sống lâu
+    mutable sf::Font font; //Giữ font sống lâu
 
 public:
     CText(std::string text, std::string font, float size, float x, float y,
