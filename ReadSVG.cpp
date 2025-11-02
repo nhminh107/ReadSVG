@@ -8,7 +8,7 @@ int main()
     sf::ContextSettings settings;
     settings.antialiasingLevel = 8;  // có thể thử 4, 8 hoặc 16
 
-    sf::RenderWindow window(sf::VideoMode(1200, 600), "SVG Renderer - Factory Pattern", sf::Style::Default, settings);
+    sf::RenderWindow window(sf::VideoMode(1920, 1080), "SVG Renderer - Factory Pattern", sf::Style::Default, settings);
     window.setFramerateLimit(60);
 
     // 2️⃣ Tạo document SVG

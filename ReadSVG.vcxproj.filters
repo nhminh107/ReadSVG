@@ -42,6 +42,12 @@
     <ClCompile Include="CText.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
+    <ClCompile Include="CEllipse.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CLine.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="SVGImage.XML">
@@ -71,6 +77,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CText.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CEllipse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CLine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

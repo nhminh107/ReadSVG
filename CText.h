@@ -1,36 +1,43 @@
 ﻿#pragma once
-#include <iostream>
-#include "SVGTypes.h"
 #include "CShape.h"
+#include "SVGTypes.h"
 #include <string>
-
-using namespace std;
+#include <SFML/Graphics.hpp> // Cần thiết cho sf::Font
 
 class CText : public CShape {
 private:
-    string content;      
-    Point startPoint;     // Tọa độ bắt đầu (x, y)
-    string fontFamily;
+    // Thuộc tính riêng của Text
+    std::string content;
+    Point startPoint;
+    std::string fontFamily;
     float fontSize;
+    // BỔ SUNG: Font phải được lưu trữ trong lớp để dùng lại (tải 1 lần)
+    sf::Font m_font;
 
 public:
+    // Constructor
     CText(
-        const string& textContent,
-        const Point& start,             // Vị trí
-        const string& fontFam = "times.ttf",          // Font Family
-        float size,                     // Font Size
-        const Color& fColor,            // Màu nền (Fill/Text color)
-        const Color& sColor,            // Màu viền (Stroke color)
-        float sWidth,                   // Độ dày nét viền (Stroke width)
-        const Matrix& fMatrix           // Ma trận biến đổi
+        const std::string& textContent,
+        const Point& start,
+        const std::string& fontFam,
+        float size,
+        const Color& fColor,
+        const Color& sColor,
+        float sWidth,
+        const Matrix& fMatrix
     ) :
         content(textContent),
         startPoint(start),
         fontFamily(fontFam),
         fontSize(size),
         CShape(fColor, sColor, sWidth, fMatrix)
-        // NOTE: Mặc dù <text> không có stroke/strokeWidth, ta vẫn truyền vào để giữ tính nhất quán của CShape.
     {}
 
+    // Khai báo hàm draw() là bắt buộc
     void draw(sf::RenderWindow& window) const override;
+
+    // BỔ SUNG: Hàm tải font một lần duy nhất. Được gọi ngay sau khi tạo đối tượng.
+    bool loadFont() {
+        return m_font.loadFromFile(fontFamily);
+    }
 };
