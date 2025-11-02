@@ -203,28 +203,95 @@ CShape* ShapeFactory::createShape(xml_node<>* node)
 
     // --- <text> ---
     if (tag == "text") {
+        // --- Lấy toạ độ (x, y)
         float x = getAttr(node, "x") ? stof(getAttr(node, "x")) : 0.f;
         float y = getAttr(node, "y") ? stof(getAttr(node, "y")) : 0.f;
+        Point startPoint(x, y);
 
+        // --- Lấy màu fill / stroke
         Color fill = parseColor(getAttr(node, "fill"));
         Color stroke = parseColor(getAttr(node, "stroke"));
         float sw = getAttr(node, "stroke-width") ? stof(getAttr(node, "stroke-width")) : 0.f;
 
-        string textStr = node->value() ? node->value() : "";
-        string fontFamily = getAttr(node, "font-family") ? getAttr(node, "font-family") : "arial.ttf";
+        // --- Lấy nội dung text
+        std::string textStr = node->value() ? node->value() : "";
+
+        // --- Font và kích thước
+        std::string fontFamily = getAttr(node, "font-family") ? getAttr(node, "font-family") : "D:/PJ1_OOP/ReadSVG/x64/Debug/times.ttf";
         float fontSize = getAttr(node, "font-size") ? stof(getAttr(node, "font-size")) : 20.f;
 
-        return new CText(
+        CText* textObj = new CText(
             textStr,
+            startPoint, 
             fontFamily,
             fontSize,
-            x,
-            y,
             fill,
             stroke,
             sw,
             m
         );
+
+        // --- Gọi hàm tải font (nếu có lỗi thì trả nullptr)
+        if (!textObj->loadFont()) {
+            std::cerr << "⚠️ Lỗi: Không thể tải font '" << fontFamily << "'\n";
+        }
+
+        return textObj;
+    }
+
+    // --- <line> ---
+    if (tag == "line") {
+        // Lấy toạ độ điểm đầu và điểm cuối
+        float x1 = getAttr(node, "x1") ? stof(getAttr(node, "x1")) : 0.f;
+        float y1 = getAttr(node, "y1") ? stof(getAttr(node, "y1")) : 0.f;
+        float x2 = getAttr(node, "x2") ? stof(getAttr(node, "x2")) : 0.f;
+        float y2 = getAttr(node, "y2") ? stof(getAttr(node, "y2")) : 0.f;
+
+        // Lấy màu stroke
+        Color stroke = parseColor(getAttr(node, "stroke"));
+        float sw = getAttr(node, "stroke-width") ? stof(getAttr(node, "stroke-width")) : 1.f;
+
+        // Độ trong suốt stroke (nếu có)
+        float strokeOpacity = 1.0f;
+        if (const char* so = getAttr(node, "stroke-opacity"))
+            strokeOpacity = stof(so);
+        stroke.a = static_cast<int>(stroke.a * strokeOpacity);
+
+        // Tạo đối tượng CLine
+        return new CLine(x1, y1, x2, y2, stroke, sw, m);
+    }
+
+    if (tag == "polyline") {
+        const char* pts_raw = getAttr(node, "points");
+        vector<Point> pts;
+        if (pts_raw) {
+            stringstream ss(pts_raw);
+            string token;
+            while (getline(ss, token, ' ')) {
+                if (token.empty()) continue;
+                size_t comma = token.find(',');
+                if (comma != string::npos) {
+                    float x = stof(token.substr(0, comma));
+                    float y = stof(token.substr(comma + 1));
+                    pts.emplace_back(x, y);
+                }
+            }
+        }
+
+        Color fill = parseColor(getAttr(node, "fill"));
+        Color stroke = parseColor(getAttr(node, "stroke"));
+        float sw = getAttr(node, "stroke-width") ? stof(getAttr(node, "stroke-width")) : 1.f;
+
+        float fillOpacity = 1.0f;
+        if (const char* fo = getAttr(node, "fill-opacity")) fillOpacity = stof(fo);
+        float strokeOpacity = 1.0f;
+        if (const char* so = getAttr(node, "stroke-opacity")) strokeOpacity = stof(so);
+
+        fill.a = static_cast<int>(fill.a * fillOpacity);
+        stroke.a = static_cast<int>(stroke.a * strokeOpacity);
+
+        // polyline không khép kín
+        return new CPolygon(pts, sw, fill, stroke, m, false);
     }
 
     return nullptr; // không nhận dạng được
