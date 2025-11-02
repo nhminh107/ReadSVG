@@ -290,7 +290,6 @@ CShape* ShapeFactory::createShape(xml_node<>* node)
         fill.a = static_cast<int>(fill.a * fillOpacity);
         stroke.a = static_cast<int>(stroke.a * strokeOpacity);
 
-        // polyline không khép kín
         return new CPolygon(pts, sw, fill, stroke, m, false);
     }
 
