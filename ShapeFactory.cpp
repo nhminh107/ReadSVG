@@ -113,18 +113,38 @@ CShape* ShapeFactory::createShape(xml_node<>* node)
         Color stroke = parseColor(getAttr(node, "stroke"));
         float sw = getAttr(node, "stroke-width") ? stof(getAttr(node, "stroke-width")) : 1.f;
 
-        // NOTE: Thêm xử lý fill-opacity & stroke-opacity
         float fillOpacity = 1.0f;
-        if (const char* fo = getAttr(node, "fill-opacity"))
-            fillOpacity = stof(fo);
+        if (const char* fo = getAttr(node, "fill-opacity")) fillOpacity = stof(fo);
         float strokeOpacity = 1.0f;
-        if (const char* so = getAttr(node, "stroke-opacity"))
-            strokeOpacity = stof(so);
+        if (const char* so = getAttr(node, "stroke-opacity")) strokeOpacity = stof(so);
 
         fill.a = static_cast<int>(fill.a * fillOpacity);
         stroke.a = static_cast<int>(stroke.a * strokeOpacity);
 
         return new CCircle(r, cx, cy, fill, stroke, sw, m);
+    }
+
+    // --- <ellipse> ---
+    if (tag == "ellipse") {
+        float cx = getAttr(node, "cx") ? stof(getAttr(node, "cx")) : 0.f;
+        float cy = getAttr(node, "cy") ? stof(getAttr(node, "cy")) : 0.f;
+        float rx = getAttr(node, "rx") ? stof(getAttr(node, "rx")) * 2.0f : 0.f; // SVG: bán trục
+        float ry = getAttr(node, "ry") ? stof(getAttr(node, "ry")) * 2.0f : 0.f;
+
+        Color fill = parseColor(getAttr(node, "fill"));
+        Color stroke = parseColor(getAttr(node, "stroke"));
+        float sw = getAttr(node, "stroke-width") ? stof(getAttr(node, "stroke-width")) : 1.f;
+
+        float fillOpacity = 1.0f;
+        if (const char* fo = getAttr(node, "fill-opacity")) fillOpacity = stof(fo);
+        float strokeOpacity = 1.0f;
+        if (const char* so = getAttr(node, "stroke-opacity")) strokeOpacity = stof(so);
+
+        fill.a = static_cast<int>(fill.a * fillOpacity);
+        stroke.a = static_cast<int>(stroke.a * strokeOpacity);
+
+        Point center(cx, cy);
+        return new CEllipse(center, rx, ry, fill, stroke, sw, m);
     }
 
     // --- <rect> ---
@@ -137,13 +157,10 @@ CShape* ShapeFactory::createShape(xml_node<>* node)
         Color stroke = parseColor(getAttr(node, "stroke"));
         float sw = getAttr(node, "stroke-width") ? stof(getAttr(node, "stroke-width")) : 1.f;
 
-        // NOTE: Thêm xử lý fill-opacity & stroke-opacity
         float fillOpacity = 1.0f;
-        if (const char* fo = getAttr(node, "fill-opacity"))
-            fillOpacity = stof(fo);
+        if (const char* fo = getAttr(node, "fill-opacity")) fillOpacity = stof(fo);
         float strokeOpacity = 1.0f;
-        if (const char* so = getAttr(node, "stroke-opacity"))
-            strokeOpacity = stof(so);
+        if (const char* so = getAttr(node, "stroke-opacity")) strokeOpacity = stof(so);
 
         fill.a = static_cast<int>(fill.a * fillOpacity);
         stroke.a = static_cast<int>(stroke.a * strokeOpacity);
@@ -173,13 +190,10 @@ CShape* ShapeFactory::createShape(xml_node<>* node)
         Color stroke = parseColor(getAttr(node, "stroke"));
         float sw = getAttr(node, "stroke-width") ? stof(getAttr(node, "stroke-width")) : 1.f;
 
-        // NOTE: Thêm xử lý fill-opacity & stroke-opacity
         float fillOpacity = 1.0f;
-        if (const char* fo = getAttr(node, "fill-opacity"))
-            fillOpacity = stof(fo);
+        if (const char* fo = getAttr(node, "fill-opacity")) fillOpacity = stof(fo);
         float strokeOpacity = 1.0f;
-        if (const char* so = getAttr(node, "stroke-opacity"))
-            strokeOpacity = stof(so);
+        if (const char* so = getAttr(node, "stroke-opacity")) strokeOpacity = stof(so);
 
         fill.a = static_cast<int>(fill.a * fillOpacity);
         stroke.a = static_cast<int>(stroke.a * strokeOpacity);
@@ -187,5 +201,32 @@ CShape* ShapeFactory::createShape(xml_node<>* node)
         return new CPolygon(pts, sw, fill, stroke, m);
     }
 
+    // --- <text> ---
+    if (tag == "text") {
+        float x = getAttr(node, "x") ? stof(getAttr(node, "x")) : 0.f;
+        float y = getAttr(node, "y") ? stof(getAttr(node, "y")) : 0.f;
+
+        Color fill = parseColor(getAttr(node, "fill"));
+        Color stroke = parseColor(getAttr(node, "stroke"));
+        float sw = getAttr(node, "stroke-width") ? stof(getAttr(node, "stroke-width")) : 0.f;
+
+        string textStr = node->value() ? node->value() : "";
+        string fontFamily = getAttr(node, "font-family") ? getAttr(node, "font-family") : "arial.ttf";
+        float fontSize = getAttr(node, "font-size") ? stof(getAttr(node, "font-size")) : 20.f;
+
+        return new CText(
+            textStr,
+            fontFamily,
+            fontSize,
+            x,
+            y,
+            fill,
+            stroke,
+            sw,
+            m
+        );
+    }
+
     return nullptr; // không nhận dạng được
 }
+

@@ -51,10 +51,14 @@ Matrix CSVGDocument::calculateRootTransform() const {
     float scaleY = scrHeight / scrViewBox.heightView;
     float uniformScale = std::min(scaleX, scaleY);
 
+    float offsetX = (scrWidth - scrViewBox.widthView * uniformScale) / 2.f;
+    float offsetY = (scrHeight - scrViewBox.heightView * uniformScale) / 2.f;
+
     Matrix M_scale = Matrix::createScale(uniformScale, uniformScale);
     Matrix M_translate = Matrix::createTranslation(-scrViewBox.xLeft, -scrViewBox.yLeft);
+    Matrix M_offset = Matrix::createTranslation(offsetX, offsetY);
 
-    return M_scale.multiply(M_translate);
+    return M_offset.multiply(M_scale).multiply(M_translate);
 }
 
 void CSVGDocument::applyRootTransform() {

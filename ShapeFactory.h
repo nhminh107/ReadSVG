@@ -7,7 +7,8 @@
 #include "CRectangle.h"
 #include "Polygon.h"
 #include "SVGTypes.h"
-
+#include "CText.h"
+#include "CEllipse.h"
 class ShapeFactory {
 private:
     // --- Hỗ trợ nội bộ ---

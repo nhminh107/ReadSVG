@@ -131,6 +131,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CCircle.cpp" />
+    <ClCompile Include="CEllipse.cpp" />
     <ClCompile Include="CSVGDocument.cpp" />
     <ClCompile Include="CText.cpp" />
     <ClCompile Include="Polygon.cpp" />
@@ -145,6 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CCircle.h" />
+    <ClInclude Include="CEllipse.h" />
     <ClInclude Include="CRectangle.h" />
     <ClInclude Include="CShape.h" />
     <ClInclude Include="CSVGDocument.h" />

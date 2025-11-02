@@ -2,12 +2,19 @@
 using namespace std;
 
 void CText::draw(sf::RenderWindow& window) const {
-    sf::Text textSF;
-    textSF.setFont(font); // dùng font member
-    textSF.setString(content);
-    textSF.setCharacterSize(static_cast<unsigned int>(fontSize));
-    textSF.setFillColor(fillColor.to_sfml_color());
-    textSF.setPosition(place.xPoint, place.yPoint);
+    Point transformedPlace = place;
+    transformedPlace.applyTransform(this->getFinalMatrix());
 
-    window.draw(textSF);
+    sf::Font font;
+    if (!font.loadFromFile(fontFamily)) return;
+
+    sf::Text text;
+    text.setFont(font);
+    text.setString(content);
+    text.setCharacterSize(fontSize);
+    text.setFillColor(fillColor.to_sfml_color());
+    text.setPosition(transformedPlace.xPoint, transformedPlace.yPoint);
+
+    //window.draw(text);
 }
+
