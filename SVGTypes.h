@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <cstdint>
 #include <sstream>
-#include "SVGTypes.h"
 
 using namespace std;
 const int MATRIX_SIZE = 3;
