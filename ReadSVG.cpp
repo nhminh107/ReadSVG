@@ -6,7 +6,7 @@ int main()
 {
     // 1️⃣ Tạo cửa sổSFML
     sf::ContextSettings settings;
-    settings.antialiasingLevel = 8;  // có thể thử 4, 8 hoặc 16
+    settings.antialiasingLevel = 16;  // có thể thử 4, 8 hoặc 16
 
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "SVG Renderer - Factory Pattern", sf::Style::Default, settings);
     window.setFramerateLimit(60);
