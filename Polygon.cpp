@@ -8,41 +8,81 @@ using namespace std;
 void CPolygon::draw(sf::RenderWindow& window) const {
     if (pointList.empty()) return;
 
-    // 1️⃣ Lấy ma trận biến đổi cuối cùng
-    const Matrix& m = this->getFinalMatrix();
+    // 1. TẠO BẢN SAO VÀ ÁP DỤNG BIẾN ĐỔI (TRANSFORM)
+    std::vector<Point> transformed_points = pointList;
 
-    // 2️⃣ Biến đổi tất cả các điểm
-    vector<Point> transformed = pointList;
-    for (auto& p : transformed)
-        p.applyTransform(m);
-
-    // 3️⃣ Tính scale trung bình từ ma trận (như Circle)
-    float scale_x = std::sqrt(m.m[0][0] * m.m[0][0] + m.m[1][0] * m.m[1][0]);
-    float scale_y = std::sqrt(m.m[0][1] * m.m[0][1] + m.m[1][1] * m.m[1][1]);
-    float avg_scale = (scale_x + scale_y) / 2.0f;
-
-    // 4️⃣ Tạo shape fill
-    if (fillColor.a > 0) {
-        sf::ConvexShape poly;
-        poly.setPointCount(transformed.size());
-        for (size_t i = 0; i < transformed.size(); ++i)
-            poly.setPoint(i, sf::Vector2f(transformed[i].xPoint, transformed[i].yPoint));
-
-        poly.setFillColor(fillColor.to_sfml_color());
-        poly.setOutlineThickness(0.f);
-        window.draw(poly);
+    // Áp dụng phép biến đổi lên từng điểm
+    for (Point& p : transformed_points) {
+        p.applyTransform(this->finalMatrix);
     }
 
-    // 5️⃣ Tạo stroke (outline)
-    if (strokeWidth > 0 && strokeColor.a > 0) {
-        sf::ConvexShape outline;
-        outline.setPointCount(transformed.size());
-        for (size_t i = 0; i < transformed.size(); ++i)
-            outline.setPoint(i, sf::Vector2f(transformed[i].xPoint, transformed[i].yPoint));
+    // Lấy thuộc tính màu từ lớp cơ sở
+    sf::Color fill_color = this->fillColor.to_sfml_color();
+    sf::Color stroke_color = this->strokeColor.to_sfml_color();
+    float stroke_width = this->strokeWidth;
 
-        outline.setFillColor(sf::Color::Transparent);
-        outline.setOutlineColor(strokeColor.to_sfml_color());
-        outline.setOutlineThickness(strokeWidth * avg_scale); // chỉ scale 1 lần
-        window.draw(outline);
+    // 2. VẼ NỀN (FILL)
+    if (fill_color.a > 0) {
+        sf::ConvexShape fill_shape;
+        fill_shape.setPointCount(transformed_points.size());
+
+        // Gán các điểm đã biến đổi
+        for (size_t i = 0; i < transformed_points.size(); ++i) {
+            fill_shape.setPoint(i, sf::Vector2f(transformed_points[i].xPoint, transformed_points[i].yPoint));
+        }
+
+        fill_shape.setFillColor(fill_color);
+        fill_shape.setOutlineThickness(0.0f);
+
+        window.draw(fill_shape);
+    }
+
+    // 3. VẼ VIỀN (STROKE)
+    if (stroke_width > 0 && stroke_color.a > 0) {
+        if (isClosed) {
+            // --- VẼ VIỀN CHO POLYGON KÍN ---
+            sf::ConvexShape outline_shape;
+            outline_shape.setPointCount(transformed_points.size());
+
+            for (size_t i = 0; i < transformed_points.size(); ++i) {
+                outline_shape.setPoint(i, sf::Vector2f(transformed_points[i].xPoint, transformed_points[i].yPoint));
+            }
+
+            outline_shape.setFillColor(sf::Color::Transparent);
+            outline_shape.setOutlineColor(stroke_color);
+            outline_shape.setOutlineThickness(stroke_width);
+
+            window.draw(outline_shape);
+        }
+        else {
+            // --- VẼ VIỀN CHO POLYLINE MỞ ---
+            // Vẽ các đoạn thẳng nối liền với độ dày tùy chỉnh
+            for (size_t i = 0; i < transformed_points.size() - 1; ++i) {
+                sf::Vertex line[] = {
+                    sf::Vertex(sf::Vector2f(transformed_points[i].xPoint, transformed_points[i].yPoint), stroke_color),
+                    sf::Vertex(sf::Vector2f(transformed_points[i + 1].xPoint, transformed_points[i + 1].yPoint), stroke_color)
+                };
+
+                // Vẽ hình chữ nhật dày để mô phỏng stroke width
+                float dx = transformed_points[i + 1].xPoint - transformed_points[i].xPoint;
+                float dy = transformed_points[i + 1].yPoint - transformed_points[i].yPoint;
+                float length = std::sqrt(dx * dx + dy * dy);
+
+                if (length > 0) {
+                    // Vector vuông góc
+                    float perpX = -dy / length * (stroke_width / 2.0f);
+                    float perpY = dx / length * (stroke_width / 2.0f);
+
+                    sf::ConvexShape segment(4);
+                    segment.setPoint(0, sf::Vector2f(transformed_points[i].xPoint + perpX, transformed_points[i].yPoint + perpY));
+                    segment.setPoint(1, sf::Vector2f(transformed_points[i + 1].xPoint + perpX, transformed_points[i + 1].yPoint + perpY));
+                    segment.setPoint(2, sf::Vector2f(transformed_points[i + 1].xPoint - perpX, transformed_points[i + 1].yPoint - perpY));
+                    segment.setPoint(3, sf::Vector2f(transformed_points[i].xPoint - perpX, transformed_points[i].yPoint - perpY));
+
+                    segment.setFillColor(stroke_color);
+                    window.draw(segment);
+                }
+            }
+        }
     }
 }

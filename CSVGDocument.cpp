@@ -97,7 +97,7 @@ void CSVGDocument::applyRootTransform() {
     // Sử dụng rootMatrix đã được tính toán trong loadFromFile
     const Matrix& root = this->rootMatrix;
 
-    for (CShape* shape : elements) { /
+    for (CShape* shape : elements) { // Dùng range-based for cho code sạch hơn
         if (!shape) continue;
 
         // M_new = M_root * M_element (Nhân ma trận gốc vào tất cả các phần tử con)
