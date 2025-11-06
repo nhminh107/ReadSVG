@@ -97,7 +97,7 @@ void CSVGDocument::applyRootTransform() {
     // Sử dụng rootMatrix đã được tính toán trong loadFromFile
     const Matrix& root = this->rootMatrix;
 
-    for (CShape* shape : elements) { // Dùng range-based for cho code sạch hơn
+    for (CShape* shape : elements) { /
         if (!shape) continue;
 
         // M_new = M_root * M_element (Nhân ma trận gốc vào tất cả các phần tử con)
@@ -150,14 +150,14 @@ bool CSVGDocument::loadFromFile(const std::string& filename) {
             scrHeight = std::stof(hAttr);
         }
         else {
-            scrWidth = 800; // Giá trị mặc định nếu thiếu
-            scrHeight = 800;
+            scrWidth = 1920; // Giá trị mặc định nếu thiếu
+            scrHeight = 1080;
         }
     }
     catch (const std::exception&) {
         cerr << "Loi chuyen doi kich thuoc. Dung gia tri mac dinh." << endl;
-        scrWidth = 800;
-        scrHeight = 800;
+        scrWidth = 1920;
+        scrHeight = 1080;
     }
 
     // --- Đọc viewBox ---

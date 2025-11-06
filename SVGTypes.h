@@ -109,7 +109,7 @@ struct Matrix {
         result.m[1][0] = sinA;
         result.m[1][1] = cosA;
         return result; 
-    }
+    }   
 };
 
 class Point {

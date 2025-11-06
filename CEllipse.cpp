@@ -1,10 +1,12 @@
-﻿#include "CEllipse.h"
+﻿// ============ ELLIPSE.CPP ============
+#include "CEllipse.h"
 #include <SFML/Graphics.hpp>
 #include <cmath>
+
 using namespace std;
 
 void CEllipse::draw(sf::RenderWindow& window) const {
-    Matrix m = this->getFinalMatrix();
+    const Matrix& m = this->getFinalMatrix();
 
     // Tâm đã transform
     Point centerT = center;
@@ -22,25 +24,23 @@ void CEllipse::draw(sf::RenderWindow& window) const {
     py.applyTransform(m);
     float scaled_ry = py.distance(centerT);
 
-    // Dùng bán trục đã scale để dựng ellipse.
-    // Tạo CircleShape với radius base và scale theo tỉ lệ (an toàn)
-    float base = 100.f; // base radius for circle shape
+    // Tạo CircleShape với base radius
+    float base = 100.0f;
     sf::CircleShape circle(base);
     circle.setPointCount(100);
 
-    // scale so that base * scaleX = scaled_rx
-    float scaleX = (base > 0.f) ? (scaled_rx / base) : 1.f;
-    float scaleY = (base > 0.f) ? (scaled_ry / base) : 1.f;
+    // Scale để khớp với bán trục đã transform
+    float scaleX = (base > 0.0f) ? (scaled_rx / base) : 1.0f;
+    float scaleY = (base > 0.0f) ? (scaled_ry / base) : 1.0f;
     circle.setScale(scaleX, scaleY);
 
-    // vị trí: đặt top-left
-    circle.setPosition(centerT.xPoint - scaled_rx, centerT.yPoint - scaled_ry);
+    // Đặt origin tại tâm (giống Circle)
+    circle.setOrigin(base, base);
+    circle.setPosition(centerT.xPoint, centerT.yPoint);
 
-    // stroke thickness scale
-    float sX = fabs(m.m[0][0]);
-    float sY = fabs(m.m[1][1]);
-    float avgS = (sX + sY) * 0.5f;
-    circle.setOutlineThickness(strokeWidth * avgS);
+    // SỬA: Tính average scale giống Circle
+    float avgScale = (scaled_rx / rx + scaled_ry / ry) * 0.5f;
+    circle.setOutlineThickness(strokeWidth * avgScale);
 
     circle.setFillColor(fillColor.to_sfml_color());
     circle.setOutlineColor(strokeColor.to_sfml_color());
