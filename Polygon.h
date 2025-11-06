@@ -17,4 +17,5 @@ public:
         isClosed(closed) {}
 
     void draw(sf::RenderWindow& window) const override;
+    void printDebugInfo() const;
 };

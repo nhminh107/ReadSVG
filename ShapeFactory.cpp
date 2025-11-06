@@ -222,7 +222,7 @@ CShape* ShapeFactory::createShape(xml_node<>* node)
 
         CText* textObj = new CText(
             textStr,
-            startPoint, 
+            startPoint,
             fontFamily,
             fontSize,
             fill,
@@ -263,36 +263,48 @@ CShape* ShapeFactory::createShape(xml_node<>* node)
 
     if (tag == "polyline") {
         const char* pts_raw = getAttr(node, "points");
-        vector<Point> pts;
+        std::vector<Point> pts;
+
+        // --- SỬA LỖI: Logic phân tích chuỗi tọa độ linh hoạt và an toàn ---
         if (pts_raw) {
-            stringstream ss(pts_raw);
-            string token;
-            while (getline(ss, token, ' ')) {
-                if (token.empty()) continue;
-                size_t comma = token.find(',');
-                if (comma != string::npos) {
-                    float x = stof(token.substr(0, comma));
-                    float y = stof(token.substr(comma + 1));
-                    pts.emplace_back(x, y);
-                }
+            std::string s_pts(pts_raw);
+            // THAY THẾ: Dùng std::replace để thay tất cả dấu phẩy bằng khoảng trắng 
+            // Giúp stringstream xử lý tất cả các trường hợp (10,20 hoặc 10 20)
+            std::replace(s_pts.begin(), s_pts.end(), ',', ' ');
+
+            std::stringstream ss(s_pts);
+            float x, y;
+            while (ss >> x >> y) { // Đọc lần lượt X và Y
+                pts.emplace_back(x, y);
             }
         }
 
-        Color fill = parseColor(getAttr(node, "fill"));
-        Color stroke = parseColor(getAttr(node, "stroke"));
-        float sw = getAttr(node, "stroke-width") ? stof(getAttr(node, "stroke-width")) : 1.f;
+        // --- XỬ LÝ MÀU MẶC ĐỊNH CHUẨN SVG ---
+        const char* rawFill = getAttr(node, "fill");
+        const char* rawStroke = getAttr(node, "stroke");
 
-        float fillOpacity = 1.0f;
-        if (const char* fo = getAttr(node, "fill-opacity")) fillOpacity = stof(fo);
-        float strokeOpacity = 1.0f;
-        if (const char* so = getAttr(node, "stroke-opacity")) strokeOpacity = stof(so);
+        // Mặc định Fill: "none" (Trong suốt hoàn toàn)
+        Color fill = parseColor(rawFill ? rawFill : "none");
+
+        // Mặc định Stroke: "black" (Đen mờ đục)
+        Color stroke = parseColor(rawStroke ? rawStroke : "black");
+
+        // Độ dày nét mặc định 1.0f
+        float sw = getAttr(node, "stroke-width") ? std::stof(getAttr(node, "stroke-width")) : 1.f;
+
+        // --- ÁP DỤNG OPACITY ---
+        float fillOpacity = getAttr(node, "fill-opacity") ? std::stof(getAttr(node, "fill-opacity")) : 1.0f;
+        float strokeOpacity = getAttr(node, "stroke-opacity") ? std::stof(getAttr(node, "stroke-opacity")) : 1.0f;
 
         fill.a = static_cast<int>(fill.a * fillOpacity);
         stroke.a = static_cast<int>(stroke.a * strokeOpacity);
 
-        return new CPolygon(pts, sw, fill, stroke, m, false);
+        // Polyline là mở (false)
+        bool isClosed = false;
+
+        // Constructor CPolygon(pts, sw, fill, stroke, m, isClosed)
+        return new CPolygon(pts, sw, fill, stroke, m, isClosed);
     }
 
     return nullptr; // không nhận dạng được
 }
-

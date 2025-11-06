@@ -20,7 +20,6 @@ private:
     float scrHeight;
     viewBox scrViewBox;
     Matrix rootMatrix;
-
 public:
     // Constructor
     CSVGDocument();
